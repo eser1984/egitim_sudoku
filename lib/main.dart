@@ -1,18 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hive/hive.dart';
 import 'package:sudoku/giris_sayfasi.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  await Hive.initFlutter("sudoku");
+  await Hive.openBox('ayarlar'); // Box-- sql veritabanları tablolara denk gelir
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: GirisSayfasi(),
-    );
+    return ValueListenableBuilder<Box>(
+        valueListenable:
+            Hive.box('ayarlar').listenable(keys: ['karanlik_tema', 'dil']),
+        builder: (context, kutu, _) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: kutu.get('karanlik_tema', defaultValue: false)
+                ? ThemeData.dark()
+                : ThemeData.light(),
+            // theme: ThemeData(
+            //   textTheme: GoogleFonts.lobsterTextTheme(),
+            //   appBarTheme: AppBarTheme(
+            //     textTheme: GoogleFonts.lobsterTextTheme(),
+            //   ),
+            // ),
+            home: GirisSayfasi(),
+          );
+        });
   }
 }
